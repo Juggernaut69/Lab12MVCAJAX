@@ -1,0 +1,239 @@
+﻿
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+
+        <div class="panel-heading">
+            <h3 class="panel-title">Busqueda por Nombre y Apellido</h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group col-md-5">
+                <label>Nombre del Estudiante</label>
+                <input type="text" id="StudentName" name="StudentName" class="form-control" placeholder="Ingrese Nombre del Estudiante" required="" />
+            </div>
+            <div class="form-group col-md-5">
+                <label>Apellido del Estudiante</label>
+                <input type="text"
+                       id="StudentLastName"
+                       name="StudentLastName" class="form-control" placeholder="Ingrese Apellido del Estudiante" required="" />
+            </div>
+
+            <div class="form-group col-md-1">
+                <div style="float: right; display: inline-block;">
+                    <input class="btn btn-primary"
+                           name="submitButton"
+                           id="btnSearch"
+                           value="Buscar Estudiante"
+                           type="button" />
+                </div>
+
+            </div>
+
+        </div>
+    </div><hr />
+
+    <div class="col-lg-12 text-center mb-4">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addStudent">
+            Agregar Nuevo Estudiante
+        </button>
+    </div>
+    <hr /><hr /><hr />
+    <div class="modal fade" id="addStudent" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Agregar Nuevo Estudiante</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                        <div class="form-group">
+                            <label for="exampleFormControlInput1">Codigo</label>
+                            <input type="text" class="form-control" id="insertCodigo">
+                        </div>
+                        <div class="form-group">
+                            <label for="insertName">Nombre</label>
+                            <input type="text" class="form-control" id="insertName">
+                        </div>
+                        <div class="form-group">
+                            <label for="insertApellido">Apellido</label>
+                            <input type="text" class="form-control" id="insertApellido">
+                        </div>
+                        <div class="form-group">
+                            <label for="insertDireccion">Direccion</label>
+                            <input type="text" class="form-control" id="insertDireccion">
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btnInsert" >Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table id="tblStudent" class="table table-bordered table-striped table-responsive table-hover">
+        <thead>
+            <tr>
+                <th align="left" class="productth">ID</th>
+                <th align="left" class="productth">Student Code</th>
+                <th align="left" class="productth">Student Name</th>
+                <th align="left" class="productth">Student LastName</th>
+                <th align="left" class="productth">Student Address</th>
+                <th align="left" class="productth">Created Date</th>
+                <th align="left" class="productth">Modified Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class='producttd'>1</td>
+                <td class='producttd'>43252</td>
+                <td class='producttd'>Genaro</td>
+                <td class='producttd'>Salas</td>
+                <td class='producttd'>Av Canto Grande</td>
+                <td class='producttd'>2021/06/01</td>
+                <td class='producttd'>2021/06/01</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts
+{
+    <script>
+
+        $(function(){
+            //LoadData();
+            $("#btnSave").click(function(){
+                // alert("");
+                var std = {};
+                std.studentName = $("#StudentName").val();
+                std.StudentAddress = $("#StudentAddress").val();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("createStudent")',
+                    data: '{std: ' + JSON.stringify(std) + '}',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        LoadData()
+                    },
+                    error: function(){
+                        alert("Error while inserting data")
+                    }
+                });
+                return false;
+            })
+
+            $("#btnSearch").click(function(){
+                var name = $("#StudentName").val();
+                var lastname = $("#StudentLastName").val();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("getStudent")',
+                    dataType: "json",
+                    data: { id: '' },
+                    success: function (data) {
+                        var items = '';
+                        $.each(data, function (i, item) {
+
+                            var rows = "<tr>"
+                            + "<td class='producttd'>" + item.studentID + "</td>"
+                            + "<td class='producttd'>" + item.StudentCode + "</td>"
+                            + "<td class='producttd'>" + item.studentName + "</td>"
+                            + "<td class='producttd'>" + item.LastName + "</td>"
+                            + "<td class='producttd'>" + item.studentAddress + "</td>"
+                            + "<td class='producttd'>" + item.CreatedDate + "</td>"
+                            + "<td class='producttd'>" + item.ModifiedDate + "</td>"
+                                + "</tr>";
+
+                            function validator(re, str) {
+                                re = re.toUpperCase();
+                                str = str.toUpperCase();
+                                if (str.search(re) !== -1) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            }
+
+                            if (validator(item.studentName, name) || validator(item.LastName, lastname) ) {
+                                $('#tblStudent tbody').append(rows);
+                            }
+                        })
+                    },
+                    error: function(ex){
+                        var r = jQuery.parseJSON(ex.responseText)
+                        alert("Message: "+r.Message);
+                        alert("StackTrace: "+r.Message);
+                        alert("ExceptionType: "+r.ExceptionType);
+                    }
+                });
+            })
+
+
+            $("#btnInsert").click(function(){
+                var std = {};
+                std.StudentCode  = $("#insertCodigo").val();
+                std.studentName= $("#insertName").val();
+                std.LastName = $("#insertApellido").val();
+                std.studentAddress = $("#insertDireccion").val();
+                
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("createStudent")',
+                    data: '{std: ' + JSON.stringify(std) + '}',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        LoadData()
+                    },
+                    error: function(){
+                        alert("Error while inserting data")
+                    }
+                });
+                return false;
+            })
+
+        });
+
+        function LoadData(){
+            //$("#tblStudent tbody tr").remove();
+            $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("getStudent")',
+                    dataType: "json",
+                    data: { id: '' },
+                    success: function (data) {
+                        var items = '';
+
+                        $.each( data, function ( i, item ){
+                            var rows = "<tr>"
+                            + "<td class='producttd'>" + item.studentID + "</td>"
+                            + "<td class='producttd'>" + item.StudentCode + "</td>"
+                            + "<td class='producttd'>" + item.studentName + "</td>"
+                            + "<td class='producttd'>" + item.LastName + "</td>"
+                            + "<td class='producttd'>" + item.studentAddress + "</td>"
+                            + "<td class='producttd'>" + item.CreatedDate + "</td>"
+                            + "<td class='producttd'>" + item.ModifiedDate + "</td>"
+                            + "</tr>";
+                            $('#tblStudent tbody').append(rows);
+                        })
+                    },
+                    error: function(ex){
+                        var r = jQuery.parseJSON(ex.responseText)
+                        alert("Message: "+r.Message);
+                        alert("StackTrace: "+r.Message);
+                        alert("ExceptionType: "+r.ExceptionType);
+                    }
+                });
+                return false;
+        }
+
+    </script>    
+}
