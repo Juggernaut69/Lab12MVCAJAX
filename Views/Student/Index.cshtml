@@ -108,7 +108,7 @@
     <script>
 
         $(function(){
-            //LoadData();
+            LoadData();
             $("#btnSave").click(function(){
                 // alert("");
                 var std = {};
@@ -203,7 +203,7 @@
         });
 
         function LoadData(){
-            //$("#tblStudent tbody tr").remove();
+            $("#tblStudent tbody tr").remove();
             $.ajax({
                     type: "POST",
                     url: '@Url.Action("getStudent")',
